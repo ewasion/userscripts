@@ -8,7 +8,7 @@
 // @updateURL   https://raw.githubusercontent.com/ewasion/userscripts/master/ab-stats/ab-stats.meta.js
 // @downloadURL https://raw.githubusercontent.com/ewasion/userscripts/master/ab-stats/ab-stats.user.js
 // @include     https://animebytes.tv/user.php?*
-// @version     1.0.1
+// @version     1.0.2
 // @license     GPL-3.0
 // @grant       none
 // ==/UserScript==

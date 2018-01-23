@@ -8,7 +8,7 @@
 // @updateURL   https://raw.githubusercontent.com/ewasion/userscripts/master/ab-stats/ab-stats.meta.js
 // @downloadURL https://raw.githubusercontent.com/ewasion/userscripts/master/ab-stats/ab-stats.user.js
 // @include     https://animebytes.tv/user.php?*
-// @version     1.0.1
+// @version     1.0.2
 // @license     GPL-3.0
 // @grant       none
 // ==/UserScript==
@@ -68,8 +68,8 @@ console.log(stats);
 var upload      = stats[0],
     download    = stats[1],
     ratio       = stats[2],
-    joined      = stats[13],
-    lastseen    = stats[14],
+    joined      = stats[10],
+    lastseen    = stats[11],
     totupload   = stats[15],
     totdownload = stats[16],
     uploadday   = stats[17],
