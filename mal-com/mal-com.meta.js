@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MyAnimeList conversations
 // @namespace    https://github.com/ewasion
-// @version      0.1
+// @version      0.1.1
 // @description  Lets you see conversations between two people.
 // @author       Eva
 // @homepage     https://ewasion.github.io/userscripts/mal-com/
@@ -16,4 +16,5 @@
 // @exclude      *://myanimelist.net/profile/*/recommendations
 // @exclude      *://myanimelist.net/profile/*/clubs
 // @exclude      *://myanimelist.net/profile/*/friends
+// @license      GPL-3.0
 // ==/UserScript==
