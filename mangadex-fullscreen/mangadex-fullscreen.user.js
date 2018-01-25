@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Reader fullscreen
 // @namespace    Teasday
-// @version      0.1.1
+// @version      0.1.2
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds a fullscreen viewer to MangaDex
 // @author       Teasday, Eva
@@ -39,7 +39,9 @@
   align-items: center;
   justify-content: center;
 }
-#content.fullscreen .row {
+#content.fullscreen .row,
+#content.fullscreen #edit_button,
+#content.fullscreen #delete_button {
   display: none;
 }
 #content.fullscreen #current_page {
@@ -49,6 +51,7 @@
   max-height: 100%;
 }
 #current_page {
+  min-height: 100%;
   max-height: calc(100vh - 50px);
 }
 #content.noresize,
