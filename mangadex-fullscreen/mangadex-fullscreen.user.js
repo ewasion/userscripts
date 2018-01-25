@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         MangaDex Reader fullscreen
 // @namespace    Teasday
-// @version      0.1.0
+// @version      0.1.1
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds a fullscreen viewer to MangaDex
-// @author       Teasday
+// @author       Teasday, Eva
 // @match        https://mangadex.com/chapter/*
 // @icon         https://mangadex.com/favicon.ico
 // @homepage     https://ewasion.github.io/userscripts/mangadex-fullscreen/
@@ -85,9 +85,11 @@
   buttons.id = 'reader-size-controls';
   var fs_btn = document.createElement('div');
   fs_btn.classList.add('control-fullscreen');
+  fs_btn.title = 'Fullscreen';
   fs_btn.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
   var rs_btn = document.createElement('div');
   rs_btn.classList.add('control-resize');
+  rs_btn.title = 'Resize';
   rs_btn.innerHTML = '<i class="fas fa-expand"></i>';
   buttons.appendChild(fs_btn);
   buttons.appendChild(rs_btn);
