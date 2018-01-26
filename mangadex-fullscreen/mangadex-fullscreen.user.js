@@ -47,22 +47,24 @@
 #content.fullscreen #delete_button {
   display: none;
 }
-#content.fullscreen #current_page {
+#content.fullscreen img.reader {
   position: relative;
   z-index: 2010;
   padding: 0;
   max-height: 100%;
   max-width: none;
+  height: 100%;
 }
-#current_page {
+img.reader {
   min-height: 100%;
   max-height: calc(100vh - 50px);
 }
 #content.noresize,
-#content.noresize #current_page {
+#content.noresize img.reader {
   height: auto;
   max-height: none;
   min-height: 100%;
+  max-width: 100%;
 }
 #reader-size-controls {
   display: none;
@@ -71,8 +73,8 @@
   text-align: right;
   margin: 5px;
   font-size: 2em;
-  color: #eee;
-  text-shadow: #000 1px 1px 3px;
+  color: #ddd;
+  text-shadow: #000 1px 1px 4px;
 }
 #content.fullscreen #reader-size-controls {
   position: fixed;
@@ -81,10 +83,16 @@
   top: 5px;
   right: 5px;
   opacity: 0.3;
-  transition: opacity 0.5s;
+  transition: all 0.4s;
 }
 #content.fullscreen #reader-size-controls:hover {
   opacity: 1;
+  background: rgba(0,0,0,0.35);
+  box-shadow: 0 0 35px 15px rgba(0,0,0,0.35);
+}
+#content.fullscreen #reader-size-controls i:hover {
+  color: #fff;
+  text-shadow: #fff 0 0 10px;
 }
 
 .footer { height: auto; }
