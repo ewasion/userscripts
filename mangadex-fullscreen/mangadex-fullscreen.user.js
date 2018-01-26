@@ -28,10 +28,15 @@
   };
 
   addStyle(`
-#content.fullscreen {
+#reader-container {
+  position: relative;
+  width: calc(100vw - 15px);
+  left: calc(-50vw + 50%);
+  padding: 0 5px;
+}
+#reader-container.fullscreen {
   z-index: 2000;
   position: absolute;
-  height: 100%;
   top: 0;
   left: 0;
   right: 0;
@@ -41,31 +46,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-#content.fullscreen .row,
-#content.fullscreen #edit_button,
-#content.fullscreen #delete_button {
-  display: none;
-}
-#content.fullscreen img.reader {
-  position: relative;
-  z-index: 2010;
-  padding: 0;
-  max-height: 100%;
-  max-width: none;
   height: 100%;
+  min-height: 100%;
+  width: auto;
+}
+#reader-container.fullscreen.fitwidth {
+  height: auto;
 }
 img.reader {
-  min-height: 100%;
+  width: auto;
   max-height: calc(100vh - 50px);
 }
-#content.noresize,
-#content.noresize img.reader {
+#reader-container.fullscreen img.reader {
+  height: 100%;
+  max-height: 100%;
+  max-width: none;
+}
+#reader-container.fitwidth img.reader {
   height: auto;
   max-height: none;
-  min-height: 100%;
   max-width: 100%;
 }
+
 #reader-size-controls {
   display: none;
   cursor: pointer;
@@ -76,27 +78,65 @@ img.reader {
   color: #ddd;
   text-shadow: #000 1px 1px 4px;
 }
-#content.fullscreen #reader-size-controls {
+#reader-container.fullscreen ~ #reader-size-controls {
+  z-index: 2020;
   position: fixed;
   display: block;
-  z-index: 2020;
   top: 5px;
   right: 5px;
   opacity: 0.3;
   transition: all 0.4s;
 }
-#content.fullscreen #reader-size-controls:hover {
+#reader-container.fullscreen ~ #reader-size-controls:hover {
   opacity: 1;
-  background: rgba(0,0,0,0.35);
-  box-shadow: 0 0 35px 15px rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, .4);
+  box-shadow: 0 0 25px 15px rgba(0, 0, 0, .4);
 }
-#content.fullscreen #reader-size-controls i:hover {
+#reader-container.fullscreen ~ #reader-size-controls > div:hover {
   color: #fff;
   text-shadow: #fff 0 0 10px;
+  transition: all 0.25s;
+}
+
+#reader-page-controls,
+#reader-page-controls div {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+#reader-page-controls .prev-page { left: 0;  width: 50%; }
+#reader-page-controls .next-page { right: 0; width: 50%; }
+#reader-page-controls .prev-chapter { left: 0;  width: 20%; }
+#reader-page-controls .next-chapter { right: 0; width: 20%; }
+
+#reader-page-controls .prev-chapter,
+#reader-page-controls .next-chapter {
+  opacity: 0;
+  font-weight: bold;
+  font-size: 5vh;
+  background: radial-gradient(ellipse at center, rgba(20, 20, 20, .6) 0%, rgba(20, 20, 20, 0) 60%);
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, .8);
+}
+#reader-page-controls .prev-chapter:before {
+  content: '\xAB';
+  left: 0;
+}
+#reader-page-controls .next-chapter:before {
+  content: '\xBB';
+  right: 0;
+}
+#reader-page-controls .prev-chapter:hover,
+#reader-page-controls .next-chapter:hover {
+  opacity: 0.9;
 }
 
 .footer { height: auto; }
-.footer p { margin-bottom: 0; }
+.footer > p { margin-bottom: 0; }
 `);
 
   // control button data
@@ -106,7 +146,7 @@ img.reader {
       icon: 'expand-arrows-alt',
       titles: ['Enter fullscreen', 'Exit fullscreen']
     },
-    noresize: {
+    fitwidth: {
       icon: 'expand',
       titles: ['Fit to width (or auto)', 'Fit to height']
     }
@@ -116,9 +156,9 @@ img.reader {
 
   const content = document.getElementById('content');
 
-  const buttons = document.createElement('div');
-  buttons.id = 'reader-size-controls';
-  buttons.innerHTML = Object.entries(controls).reduce(function(acc, ctrl) {
+  const sizeControls = document.createElement('div');
+  sizeControls.id = 'reader-size-controls';
+  sizeControls.innerHTML = Object.entries(controls).reduce(function(acc, ctrl) {
     return `${acc}<div class="control-${ctrl[0]}"><i class="fas fa-${ctrl[1].icon}"></i></div>`;
   }, '');
 
@@ -128,10 +168,55 @@ img.reader {
     return `${acc}<button type="button" role="button" class="btn btn-default pull-right control-${ctrl[0]}"><i class="fas fa-${ctrl[1].icon}"></i></button>`;
   }, '');
 
-  content.insertBefore(buttons, document.getElementById('current_page'));
   content.children[0].children[2].classList.replace('col-sm-3', 'col-sm-2');
   content.children[0].children[3].classList.replace('col-sm-3', 'col-sm-2');
   content.children[0].appendChild(newCol);
+
+  const readerContainer = document.createElement('div');
+  readerContainer.id = 'reader-container';
+  readerContainer.appendChild(document.getElementById('current_page'));
+  content.insertBefore(readerContainer, content.firstElementChild.nextSibling);
+  content.appendChild(sizeControls);
+
+  const pageControls = document.createElement('div');
+  pageControls.id = 'reader-page-controls';
+  pageControls.innerHTML = `<div class="prev-page"><div class="prev-chapter"></div></div><div class="next-page"><div class="next-chapter"></div></div>`;
+  readerContainer.appendChild(pageControls);
+
+  pageControls.querySelector('.prev-page').addEventListener('click', function(evt) {
+    const cur = document.querySelector('[data-id="jump_page"] + .dropdown-menu .selected');
+    if (cur.previousElementSibling) {
+      cur.previousElementSibling.firstElementChild.click();
+    } else {
+      this.firstElementChild.click();
+    }
+  });
+  pageControls.querySelector('.prev-chapter').addEventListener('click', function(evt) {
+    evt.stopPropagation();
+    const cur = document.querySelector('[data-id="jump_chapter"] + .dropdown-menu .selected');
+    if (cur.previousElementSibling) {
+      cur.previousElementSibling.firstElementChild.click();
+    } else {
+      content.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.click();
+    }
+  });
+  pageControls.querySelector('.next-page').addEventListener('click', function(evt) {
+    const cur = document.querySelector('[data-id="jump_page"] + .dropdown-menu .selected');
+    if (cur.nextElementSibling) {
+      cur.nextElementSibling.firstElementChild.click();
+    } else {
+      this.firstElementChild.click();
+    }
+  });
+  pageControls.querySelector('.next-chapter').addEventListener('click', function(evt) {
+    evt.stopPropagation();
+    const cur = document.querySelector('[data-id="jump_chapter"] + .dropdown-menu .selected');
+    if (cur.nextElementSibling) {
+      cur.nextElementSibling.firstElementChild.click();
+    } else {
+      content.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.click();
+    }
+  });
 
   // actual js
 
@@ -139,7 +224,7 @@ img.reader {
     localStorage.setItem(`reader.${ctrl}`, val);
     for (const btn of document.querySelectorAll(`.control-${ctrl}`)) {
       btn.title = controls[ctrl].titles[val ? 1 : 0];
-      content.classList.toggle(`${ctrl}`, val);
+      readerContainer.classList.toggle(`${ctrl}`, val);
     }
   };
   const updateAll = function() {
