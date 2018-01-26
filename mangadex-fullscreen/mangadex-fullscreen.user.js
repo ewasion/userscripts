@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Reader fullscreen
 // @namespace    Teasday
-// @version      0.2
+// @version      0.3
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds a fullscreen viewer to MangaDex
 // @author       Teasday, Eva
@@ -115,7 +115,7 @@ img.reader {
   opacity: 0;
   font-weight: bold;
   font-size: 5vh;
-  background: radial-gradient(ellipse at center, rgba(20, 20, 20, .6) 0%, rgba(20, 20, 20, 0) 60%);
+  background: radial-gradient(ellipse at center, rgba(10, 10, 10, .6) 0%, rgba(10, 10, 10, 0) 60%);
   transition: opacity 0.2s;
   display: flex;
   align-items: center;
