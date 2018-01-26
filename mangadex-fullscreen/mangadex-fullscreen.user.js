@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Reader fullscreen
 // @namespace    Teasday
-// @version      0.1.2
+// @version      0.2
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds a fullscreen viewer to MangaDex
 // @author       Teasday, Eva
@@ -15,6 +15,9 @@
 
 (function() {
   'use strict';
+
+  // add css
+
   const addStyle = function (css) {
     const head = document.getElementsByTagName('head')[0];
     if (!head) return;
@@ -88,54 +91,63 @@
 .footer p { margin-bottom: 0; }
 `);
 
-  const getRsTitle = function (noresize) {
-      return noresize ? "Fit to height" : "Fit to width (or auto)";
+  // control button data
+
+  const controls = {
+    fullscreen: {
+      icon: 'expand-arrows-alt',
+      titles: ['Enter fullscreen', 'Exit fullscreen']
+    },
+    noresize: {
+      icon: 'expand',
+      titles: ['Fit to width (or auto)', 'Fit to height']
+    }
   };
 
-  const getFsTitle = function (fullscreen) {
-      return fullscreen ? "Exit fullscreen" : "Enter fullscreen";
-  };
+  // add html
 
   const content = document.getElementById('content');
+
   const buttons = document.createElement('div');
   buttons.id = 'reader-size-controls';
-  const fs_btn = document.createElement('div');
-  fs_btn.classList.add('control-fullscreen');
-  fs_btn.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
-  const rs_btn = document.createElement('div');
-  rs_btn.classList.add('control-resize');
-  rs_btn.innerHTML = '<i class="fas fa-expand"></i>';
-  buttons.appendChild(fs_btn);
-  buttons.appendChild(rs_btn);
+  buttons.innerHTML = Object.entries(controls).reduce(function(acc, ctrl) {
+    return `${acc}<div class="control-${ctrl[0]}"><i class="fas fa-${ctrl[1].icon}"></i></div>`;
+  }, '');
+
+  const newCol = document.createElement('div');
+  newCol.classList.add('col-sm-2');
+  newCol.innerHTML = Object.entries(controls).reduce(function(acc, ctrl, i) {
+    return `${acc}<button type="button" role="button" class="btn btn-default pull-right control-${ctrl[0]}"><i class="fas fa-${ctrl[1].icon}"></i></button>`;
+  }, '');
 
   content.insertBefore(buttons, document.getElementById('current_page'));
-  content.classList.add('noresize');
   content.children[0].children[2].classList.replace('col-sm-3', 'col-sm-2');
   content.children[0].children[3].classList.replace('col-sm-3', 'col-sm-2');
+  content.children[0].appendChild(newCol);
 
-  const new_col = document.createElement('div');
-  new_col.classList.add('col-sm-2');
-  new_col.innerHTML = `<button type="button" role="button" class="btn btn-default pull-right control-fullscreen"><i class="fas fa-expand-arrows-alt"></i> </button>
-                       <button type="button" role="button" class="btn btn-default pull-right control-resize"><i class="fas fa-expand"></i> </button>`;
-  content.children[0].appendChild(new_col);
+  // actual js
 
-  for (const fs of document.querySelectorAll('.control-fullscreen')) {
-    fs.title = getFsTitle(content.classList.contains('fullscreen'));
-    fs.onclick = function() {
-      const fullscreen = content.classList.toggle('fullscreen');
-      for (const fs of document.querySelectorAll('.control-fullscreen')) {
-        fs.title = getFsTitle(fullscreen);
-      }
-    };
-  }
-  for (const rs of document.querySelectorAll('.control-resize')) {
-    rs.title = getRsTitle(content.classList.contains('noresize'));
-    rs.onclick = function() {
-      const noresize = content.classList.toggle('noresize');
-      for (const rs of document.querySelectorAll('.control-resize')) {
-        rs.title = getRsTitle(noresize);
-      }
-    };
-  }
+  const updateCtrl = function(ctrl, val) {
+    localStorage.setItem(`reader.${ctrl}`, val);
+    for (const btn of document.querySelectorAll(`.control-${ctrl}`)) {
+      btn.title = controls[ctrl].titles[val ? 1 : 0];
+      content.classList.toggle(`${ctrl}`, val);
+    }
+  };
+  const updateAll = function() {
+    for (let ctrl of Object.keys(controls)) {
+      updateCtrl(ctrl, localStorage.getItem(`reader.${ctrl}`) === 'true');
+    }
+  };
+  const listenBtnClick = function(ctrl) {
+    for (const btn of document.querySelectorAll(`.control-${ctrl}`)) {
+      btn.addEventListener('click', function() {
+        updateCtrl(ctrl, localStorage.getItem(`reader.${ctrl}`) !== 'true');
+      }, false);
+    }
+  };
 
+  Object.keys(controls).map(listenBtnClick);
+  window.addEventListener('focus', updateAll, false);
+  updateAll();
 })();
