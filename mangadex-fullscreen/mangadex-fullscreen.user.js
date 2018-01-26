@@ -15,14 +15,14 @@
 
 (function() {
   'use strict';
-  function addStyle (css) {
-    var head = document.getElementsByTagName('head')[0];
+  const addStyle = function (css) {
+    const head = document.getElementsByTagName('head')[0];
     if (!head) return;
-    var style = document.createElement('style');
+    const style = document.createElement('style');
     style.type = 'text/css';
     style.innerHTML = css;
     head.appendChild(style);
-  }
+  };
 
   addStyle(`
 #content.fullscreen {
@@ -49,6 +49,7 @@
   z-index: 2010;
   padding: 0;
   max-height: 100%;
+  max-width: none;
 }
 #current_page {
   min-height: 100%;
@@ -82,41 +83,58 @@
 #content.fullscreen #reader-size-controls:hover {
   opacity: 1;
 }
+
+.footer { height: auto; }
+.footer p { margin-bottom: 0; }
 `);
 
-  var buttons = document.createElement('div');
+  const getRsTitle = function (noresize) {
+      return noresize ? "Fit to height" : "Fit to width (or auto)";
+  };
+
+  const getFsTitle = function (fullscreen) {
+      return fullscreen ? "Exit fullscreen" : "Enter fullscreen";
+  };
+
+  const content = document.getElementById('content');
+  const buttons = document.createElement('div');
   buttons.id = 'reader-size-controls';
-  var fs_btn = document.createElement('div');
+  const fs_btn = document.createElement('div');
   fs_btn.classList.add('control-fullscreen');
-  fs_btn.title = 'Fullscreen';
   fs_btn.innerHTML = '<i class="fas fa-expand-arrows-alt"></i>';
-  var rs_btn = document.createElement('div');
+  const rs_btn = document.createElement('div');
   rs_btn.classList.add('control-resize');
-  rs_btn.title = 'Resize';
   rs_btn.innerHTML = '<i class="fas fa-expand"></i>';
   buttons.appendChild(fs_btn);
   buttons.appendChild(rs_btn);
 
-  var content = document.getElementById('content');
   content.insertBefore(buttons, document.getElementById('current_page'));
   content.classList.add('noresize');
   content.children[0].children[2].classList.replace('col-sm-3', 'col-sm-2');
   content.children[0].children[3].classList.replace('col-sm-3', 'col-sm-2');
 
-  var new_col = document.createElement('div');
+  const new_col = document.createElement('div');
   new_col.classList.add('col-sm-2');
-  new_col.innerHTML = `<button type="button" role="button" title="Fullscreen" class="btn btn-default pull-right control-fullscreen"><i class="fas fa-expand-arrows-alt"></i> </button>
-                       <button type="button" role="button" title="Resize" class="btn btn-default pull-right control-resize"><i class="fas fa-expand"></i> </button>`;
+  new_col.innerHTML = `<button type="button" role="button" class="btn btn-default pull-right control-fullscreen"><i class="fas fa-expand-arrows-alt"></i> </button>
+                       <button type="button" role="button" class="btn btn-default pull-right control-resize"><i class="fas fa-expand"></i> </button>`;
   content.children[0].appendChild(new_col);
 
-  for (var fs of document.querySelectorAll('.control-fullscreen')) {
+  for (const fs of document.querySelectorAll('.control-fullscreen')) {
+    fs.title = getFsTitle(content.classList.contains('fullscreen'));
     fs.onclick = function() {
-      content.classList.toggle('fullscreen');
+      const fullscreen = content.classList.toggle('fullscreen');
+      for (const fs of document.querySelectorAll('.control-fullscreen')) {
+        fs.title = getFsTitle(fullscreen);
+      }
     };
   }
-  for (var rs of document.querySelectorAll('.control-resize')) {
+  for (const rs of document.querySelectorAll('.control-resize')) {
+    rs.title = getRsTitle(content.classList.contains('noresize'));
     rs.onclick = function() {
-      content.classList.toggle('noresize');
+      const noresize = content.classList.toggle('noresize');
+      for (const rs of document.querySelectorAll('.control-resize')) {
+        rs.title = getRsTitle(noresize);
+      }
     };
   }
 
