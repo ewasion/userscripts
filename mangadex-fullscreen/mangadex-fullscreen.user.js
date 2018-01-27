@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Reader fullscreen
 // @namespace    Teasday
-// @version      0.3.2
+// @version      0.3.4
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds a fullscreen viewer to MangaDex
 // @author       Teasday, Eva
@@ -114,11 +114,17 @@ img.reader {
   top: 0;
   width: 100%;
   height: 100%;
+  cursor: pointer;
+  /* to help leave a little gap in the middle to make the image right-clickable */
+  pointer-events: none;
 }
-#reader-page-controls .prev-page { left: 0;  width: 50%; }
-#reader-page-controls .next-page { right: 0; width: 50%; }
-#reader-page-controls .prev-chapter { left: 0;  width: 20%; }
-#reader-page-controls .next-chapter { right: 0; width: 20%; }
+#reader-page-controls div {
+  pointer-events: auto;
+}
+#reader-page-controls .prev-page { left: 0;  width: 45%; }
+#reader-page-controls .next-page { right: 0; width: 45%; }
+#reader-page-controls .prev-chapter { left: 0;  width: 15%; }
+#reader-page-controls .next-chapter { right: 0; width: 15%; }
 
 #reader-page-controls .prev-chapter,
 #reader-page-controls .next-chapter {
@@ -154,18 +160,21 @@ img.reader {
   const controls = {
     fullscreen: {
       icon: 'expand-arrows-alt',
-      titles: ['Enter fullscreen', 'Exit fullscreen']
+      titles: ['Enter fullscreen', 'Exit fullscreen'],
+      shortcut: 'F'.charCodeAt(0),
     },
     fitwidth: {
       icon: 'expand',
-      titles: ['Fit to width (or auto)', 'Fit to height']
+      titles: ['Fit to width (or auto)', 'Fit to height'],
+      shortcut: 'R'.charCodeAt(0),
     }
   };
 
   // add html
 
-  const content = document.getElementById('content');
-  const mangaLink = content.firstElementChild.firstElementChild.firstElementChild.nextElementSibling;
+  const content = document.querySelector('#content');
+  const jumpCols = content.querySelectorAll('.row .col-sm-3');
+  const mangaLink = jumpCols[0].querySelector('a'); // works for now
 
   const sizeControls = document.createElement('div');
   sizeControls.id = 'reader-size-controls';
@@ -184,14 +193,14 @@ img.reader {
     return `${acc}<button type="button" role="button" class="btn btn-default pull-right control-${ctrl[0]}"><i class="fas fa-${ctrl[1].icon}"></i></button>`;
   }, '');
 
-  content.children[0].children[2].classList.replace('col-sm-3', 'col-sm-2');
-  content.children[0].children[3].classList.replace('col-sm-3', 'col-sm-2');
-  content.children[0].appendChild(newCol);
+  jumpCols[2].classList.replace('col-sm-3', 'col-sm-2');
+  jumpCols[3].classList.replace('col-sm-3', 'col-sm-2');
+  jumpCols[0].parentNode.appendChild(newCol);
 
   const readerContainer = document.createElement('div');
   readerContainer.id = 'reader-container';
-  readerContainer.appendChild(document.getElementById('current_page'));
-  content.insertBefore(readerContainer, content.firstElementChild.nextSibling);
+  readerContainer.appendChild(document.querySelector('#current_page'));
+  content.insertBefore(readerContainer, content.lastElementChild);
   content.appendChild(linkControls);
   content.appendChild(sizeControls);
 
