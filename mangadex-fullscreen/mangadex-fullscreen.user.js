@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Reader fullscreen
 // @namespace    Teasday
-// @version      0.3
+// @version      0.3.2
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds a fullscreen viewer to MangaDex
 // @author       Teasday, Eva
@@ -46,6 +46,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-flow: column nowrap;
   height: 100%;
   min-height: 100%;
   width: auto;
@@ -60,6 +61,7 @@ img.reader {
 #reader-container.fullscreen img.reader {
   height: 100%;
   max-height: 100%;
+  min-height: 100%;
   max-width: none;
 }
 #reader-container.fitwidth img.reader {
@@ -68,34 +70,42 @@ img.reader {
   max-width: 100%;
 }
 
-#reader-size-controls {
+.reader-hover-menu {
   display: none;
   cursor: pointer;
-  float: right;
-  text-align: right;
   margin: 5px;
   font-size: 2em;
   color: #ddd;
   text-shadow: #000 1px 1px 4px;
+  transition: all 0.4s;
 }
-#reader-container.fullscreen ~ #reader-size-controls {
+#reader-container.fullscreen ~ .reader-hover-menu {
   z-index: 2020;
   position: fixed;
   display: block;
   top: 5px;
-  right: 5px;
   opacity: 0.3;
-  transition: all 0.4s;
 }
-#reader-container.fullscreen ~ #reader-size-controls:hover {
+#reader-container.fullscreen ~ .reader-hover-menu:hover {
   opacity: 1;
-  background: rgba(0, 0, 0, .4);
-  box-shadow: 0 0 25px 15px rgba(0, 0, 0, .4);
+  background: rgba(0, 0, 0, .25);
+  box-shadow: 0 0 15px 15px rgba(0, 0, 0, .25);
+  border-radius: 50%;
 }
-#reader-container.fullscreen ~ #reader-size-controls > div:hover {
+#reader-container.fullscreen ~ .reader-hover-menu > div:hover {
   color: #fff;
   text-shadow: #fff 0 0 10px;
   transition: all 0.25s;
+}
+#reader-container.fullscreen ~ .reader-hover-menu.pull-right {
+  right: 5px;
+  float: right;
+  text-align: right;
+}
+#reader-container.fullscreen ~ .reader-hover-menu.pull-left {
+  left: 5px;
+  float: left;
+  text-align: left;
 }
 
 #reader-page-controls,
@@ -155,12 +165,18 @@ img.reader {
   // add html
 
   const content = document.getElementById('content');
+  const mangaLink = content.firstElementChild.firstElementChild.firstElementChild.nextElementSibling;
 
   const sizeControls = document.createElement('div');
   sizeControls.id = 'reader-size-controls';
+  sizeControls.classList.add('reader-hover-menu', 'pull-right');
   sizeControls.innerHTML = Object.entries(controls).reduce(function(acc, ctrl) {
     return `${acc}<div class="control-${ctrl[0]}"><i class="fas fa-${ctrl[1].icon}"></i></div>`;
   }, '');
+  const linkControls = document.createElement('div');
+  linkControls.id = 'reader-link-controls';
+  linkControls.classList.add('reader-hover-menu', 'pull-left');
+  linkControls.innerHTML = `<div><a href="${mangaLink.href}"><i class="fas fa-book" title="Back to Title"></i></a></div>`;
 
   const newCol = document.createElement('div');
   newCol.classList.add('col-sm-2');
@@ -176,6 +192,7 @@ img.reader {
   readerContainer.id = 'reader-container';
   readerContainer.appendChild(document.getElementById('current_page'));
   content.insertBefore(readerContainer, content.firstElementChild.nextSibling);
+  content.appendChild(linkControls);
   content.appendChild(sizeControls);
 
   const pageControls = document.createElement('div');
@@ -197,7 +214,7 @@ img.reader {
     if (cur.previousElementSibling) {
       cur.previousElementSibling.firstElementChild.click();
     } else {
-      content.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.click();
+      mangaLink.click();
     }
   });
   pageControls.querySelector('.next-page').addEventListener('click', function(evt) {
@@ -214,7 +231,7 @@ img.reader {
     if (cur.nextElementSibling) {
       cur.nextElementSibling.firstElementChild.click();
     } else {
-      content.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.click();
+      mangaLink.click();
     }
   });
 
