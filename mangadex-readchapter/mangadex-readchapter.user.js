@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Read Chapter Tracker
 // @namespace    Teasday
-// @version      1.0
+// @version      1.1
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds tracking of read chapters to MangaDex
 // @author       Teasday
@@ -31,28 +31,26 @@
   const UNFINISHED = 1
   const READ = 2
 
-  if (!GM_getValue) {
-    GM_getValue = GM.getValue
-    GM_setValue = GM.setValue
-    GM_deleteValue = GM.deleteValue
-  }
+  const GM_get = typeof GM_getValue !== 'undefined' ? GM_getValue : GM.getValue
+  const GM_set = typeof GM_setValue !== 'undefined' ? GM_setValue : GM.setValue
+  const GM_delete = typeof GM_deleteValue !== 'undefined' ? GM_deleteValue : GM.deleteValue
 
   /* jshint ignore:start */
   async function getChapterStatus (chapterID) {
-    return await GM_getValue(chapterID, UNREAD)
+    return await GM_get(chapterID, UNREAD)
   }
   async function setChapterStatus (chapterID, status) {
-    await GM_setValue(chapterID, status)
+    await GM_set(chapterID, status)
     return status
   }
   async function updateChapterStatus (chapterID, status) {
     if (status === UNREAD) {
-      await GM_deleteValue(chapterID)
+      await GM_delete(chapterID)
       return status
     } else {
       const oldStatus = await getChapterStatus(chapterID)
       if (status > oldStatus) {
-        await GM_setValue(chapterID, status)
+        await GM_set(chapterID, status)
         return status
       }
       return oldStatus
@@ -120,8 +118,54 @@
     return el
   }
 
-  function createBulkSelect() {
+  function appendBulkSelect(el, chapters) {
+    const chSelect = document.createElement('select')
+    chSelect.classList.add('form-control', 'input-sm')
+    for (let [i, chapter] of chapters.entries()) {
+      let str = ''
+      if (!!chapter.dataset.volumeNum) { str += `Vol. ${chapter.dataset.volumeNum} ` }
+      if (!!chapter.dataset.chapterNum) { str += `Ch. ${chapter.dataset.chapterNum} ` }
+      if (!!chapter.dataset.chapterName) { str += `${!str ? '' : ' - '}${chapter.dataset.chapterName}` }
+      if (!str) { str = 'Read Online' }
+      chSelect.options[i] = new Option(str, chapter.dataset.chapterId)
+    }
 
+    const readSelect = document.createElement('select')
+    readSelect.classList.add('form-control', 'input-sm')
+    readSelect.options[0] = new Option('Read', 2)
+    readSelect.options[1] = new Option('Unfinished', 1)
+    readSelect.options[2] = new Option('Unread', 0)
+
+    const confirmButton = document.createElement('button')
+    confirmButton.innerHTML = 'Submit'
+    confirmButton.classList.add('btn', 'btn-default', 'btn-sm')
+    confirmButton.addEventListener('click', (evt) => {
+      evt.target.setAttribute('disabled', 'true')
+      confirmButton.innerHTML = 'Updating...'
+      const newStatus = parseInt(readSelect[readSelect.selectedIndex].value)
+      const upToChapter = parseInt(chSelect[chSelect.selectedIndex].value)
+      for (let chapter of chapters.slice(0).reverse()) {
+        try {
+          const id = parseInt(chapter.attributes.href.value.split('/')[2])
+          if (!isNaN(id)) {
+            setChapterStatus(id, newStatus)
+            renderReadMark(chapter.parentNode.firstElementChild, newStatus)
+            if (id === upToChapter) {
+              break
+            }
+          }
+        } catch (err) {}
+      }
+      evt.target.removeAttribute('disabled')
+      confirmButton.innerHTML = 'Submit'
+    }, false)
+
+    el.appendChild(document.createTextNode('Mark all chapters up to '))
+    el.appendChild(chSelect)
+    el.appendChild(document.createTextNode(' as '))
+    el.appendChild(readSelect)
+    el.appendChild(document.createTextNode(' '))
+    el.appendChild(confirmButton)
   }
 
   const jumpPage = document.querySelector('#jump_page')
@@ -172,54 +216,7 @@
       th.classList.add('form-inline', 'read-chapter-bulk')
       th.colSpan = 7
       th.style.fontSize = '0.8em'
-
-      const chSelect = document.createElement('select')
-      chSelect.classList.add('form-control', 'input-sm')
-      for (let [i, chapter] of chapters.entries()) {
-        let str = ''
-        if (!!chapter.dataset.volumeNum) { str += `Vol. ${chapter.dataset.volumeNum} ` }
-        if (!!chapter.dataset.chapterNum) { str += `Ch. ${chapter.dataset.chapterNum} ` }
-        if (!!chapter.dataset.chapterName) { str += `${!str ? '' : ' - '}${chapter.dataset.chapterName}` }
-        if (!str) { str = 'Read Online' }
-        chSelect.options[i] = new Option(str, chapter.dataset.chapterId)
-      }
-
-      const readSelect = document.createElement('select')
-      readSelect.classList.add('form-control', 'input-sm')
-      readSelect.options[0] = new Option('Read', 2)
-      readSelect.options[1] = new Option('Unfinished', 1)
-      readSelect.options[2] = new Option('Unread', 0)
-
-      const confirmButton = document.createElement('button')
-      confirmButton.innerHTML = 'Submit'
-      confirmButton.classList.add('btn', 'btn-default', 'btn-sm')
-      confirmButton.addEventListener('click', (evt) => {
-        evt.target.setAttribute('disabled', 'true')
-        confirmButton.innerHTML = 'Updating...'
-        const newStatus = parseInt(readSelect[readSelect.selectedIndex].value)
-        const upToChapter = parseInt(chSelect[chSelect.selectedIndex].value)
-        for (let chapter of chapters.slice(0).reverse()) {
-          try {
-            const id = parseInt(chapter.attributes.href.value.split('/')[2])
-            if (!isNaN(id)) {
-              setChapterStatus(id, newStatus)
-              renderReadMark(chapter.parentNode.firstElementChild, newStatus)
-              if (id === upToChapter) {
-                break
-              }
-            }
-          } catch (err) {}
-        }
-        evt.target.removeAttribute('disabled')
-        confirmButton.innerHTML = 'Submit'
-      }, false)
-
-      th.appendChild(document.createTextNode('Mark all chapters up to '))
-      th.appendChild(chSelect)
-      th.appendChild(document.createTextNode(' as '))
-      th.appendChild(readSelect)
-      th.appendChild(document.createTextNode(' '))
-      th.appendChild(confirmButton)
+      appendBulkSelect(th, chapters)
       tr.appendChild(th)
       thead.appendChild(tr)
     }
