@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Read Chapter Tracker
 // @namespace    Teasday
-// @version      1.1.1
+// @version      1.1.2
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds tracking of read chapters to MangaDex
 // @author       Teasday
@@ -208,7 +208,7 @@
       chapter.parentNode.insertBefore(createReadMark(id, status), chapter.parentNode.firstElementChild)
     }
 
-    const thead = document.querySelector('#torrents thead')
+    const thead = document.querySelector('#chapters thead')
     if (thead) {
       // we're in the manga page
       const tr = document.createElement('tr')

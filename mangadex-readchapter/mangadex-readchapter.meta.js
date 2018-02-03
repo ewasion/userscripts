@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Read Chapter Tracker
 // @namespace    Teasday
-// @version      1.1.1
+// @version      1.1.2
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds tracking of read chapters to MangaDex
 // @author       Teasday
