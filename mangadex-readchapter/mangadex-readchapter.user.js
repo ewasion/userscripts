@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Read Chapter Tracker
 // @namespace    Teasday
-// @version      1.1.2
+// @version      1.1.3
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds tracking of read chapters to MangaDex
 // @author       Teasday
@@ -176,11 +176,11 @@
     const tdTitle = document.querySelector('#content span[title="Title"]').parentNode
     let readerMark = tdTitle.insertBefore(createReadMark(), tdTitle.firstElementChild)
     /* jshint ignore:start */
-    const onPageTurn = async () => {
+    const onPageTurn = async (e) => {
       try {
         const id = parseInt(jumpChapter.value)
         if (!isNaN(id)) {
-          const isLastPage = jumpPage.value === jumpPage.lastElementChild.value
+          const isLastPage = jumpPage.value + 1 >= jumpPage.lastElementChild.value
           let newStatus = (isLastPage ? READ : UNFINISHED)
           newStatus = await updateChapterStatus(id, newStatus)
           let oldReaderMark = readerMark
@@ -193,7 +193,7 @@
     }
     /* jshint ignore:end */
     const mu = new MutationObserver(onPageTurn)
-    mu.observe(document.querySelector('#current_page'), { attributes: true })
+    mu.observe(jumpPage, { attributes: true })
     onPageTurn()
   }
   else {
