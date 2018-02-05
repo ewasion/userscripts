@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         MangaDex Read Chapter Tracker
 // @namespace    Teasday
-// @version      1.1.3
+// @version      1.1.4
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds tracking of read chapters to MangaDex
 // @author       Teasday
 // @match        https://mangadex.com/*
 // @icon         https://mangadex.com/favicon.ico
-// @homepage     https://ewasion.github.io/userscripts/mangadex-readchapter/
+// @homepageURL  https://ewasion.github.io/userscripts/mangadex-readchapter/
 // @updateURL    https://raw.githubusercontent.com/ewasion/userscripts/master/mangadex-readchapter/mangadex-readchapter.meta.js
 // @downloadURL  https://raw.githubusercontent.com/ewasion/userscripts/master/mangadex-readchapter/mangadex-readchapter.user.js
 // @grant        GM_getValue
@@ -112,7 +112,7 @@
         case UNREAD:     newStatus = UNFINISHED; break
         case UNFINISHED: newStatus = READ;       break
       }
-      setChapterStatus(evt.target.dataset.id, newStatus)
+      setChapterStatus(parseInt(evt.target.dataset.id), newStatus)
       renderReadMark(evt.target, newStatus)
     }, false)
     return el
@@ -169,10 +169,10 @@
   }
 
   const jumpPage = document.querySelector('#jump_page')
+  const jumpChapter = document.querySelector('#jump_chapter')
 
-  if (jumpPage) {
+  if (jumpChapter) {
     // we're in the reader
-    const jumpChapter = document.querySelector('#jump_chapter')
     const tdTitle = document.querySelector('#content span[title="Title"]').parentNode
     let readerMark = tdTitle.insertBefore(createReadMark(), tdTitle.firstElementChild)
     /* jshint ignore:start */
@@ -180,7 +180,8 @@
       try {
         const id = parseInt(jumpChapter.value)
         if (!isNaN(id)) {
-          const isLastPage = jumpPage.value + 1 >= jumpPage.lastElementChild.value
+          // !jumpPage means this is a webtoon
+          const isLastPage = !jumpPage || jumpPage.value + 1 >= jumpPage.lastElementChild.value
           let newStatus = (isLastPage ? READ : UNFINISHED)
           newStatus = await updateChapterStatus(id, newStatus)
           let oldReaderMark = readerMark
@@ -192,8 +193,10 @@
       }
     }
     /* jshint ignore:end */
-    const mu = new MutationObserver(onPageTurn)
-    mu.observe(jumpPage, { attributes: true })
+    if (jumpPage) {
+      const mu = new MutationObserver(onPageTurn)
+      mu.observe(jumpPage, { attributes: true })
+    }
     onPageTurn()
   }
   else {
@@ -201,7 +204,7 @@
     const links = document.querySelectorAll('table tbody a')
     const chapters = Array.from(links).filter(a => a.attributes.href && a.attributes.href.value.indexOf('/chapter/') === 0)
     for (let chapter of chapters) {
-      const id = chapter.dataset.chapterId
+      const id = parseInt(chapter.dataset.chapterId)
       /* jshint ignore:start */
       const status = await getChapterStatus(id)
       /* jshint ignore:end */
