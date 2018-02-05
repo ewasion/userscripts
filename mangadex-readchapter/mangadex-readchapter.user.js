@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex Read Chapter Tracker
 // @namespace    Teasday
-// @version      1.1.4
+// @version      1.1.5
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds tracking of read chapters to MangaDex
 // @author       Teasday
@@ -181,7 +181,7 @@
         const id = parseInt(jumpChapter.value)
         if (!isNaN(id)) {
           // !jumpPage means this is a webtoon
-          const isLastPage = !jumpPage || jumpPage.value + 1 >= jumpPage.lastElementChild.value
+          const isLastPage = !jumpPage || jumpPage.value === jumpPage.lastElementChild.value
           let newStatus = (isLastPage ? READ : UNFINISHED)
           newStatus = await updateChapterStatus(id, newStatus)
           let oldReaderMark = readerMark
