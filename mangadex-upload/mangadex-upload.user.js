@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex upload
 // @namespace    https://github.com/ewasion
-// @version      0.0.1
+// @version      0.1.0
 // @license      CC-BY-NC-SA-4.0
 // @description  Highly customizable upload script for MangaDex
 // @author       Eva
@@ -25,31 +25,60 @@ function processFiles() {
   if(filepicker.get(0).files.length === 0) {
     return alert('You must select at least one file');
   }
+  if(!$('#fallback_manga').val()) {
+    return alert('You must select a fallback manga');
+  }
   let names = [];
   for (var i = 0; i < filepicker.get(0).files.length; ++i) {
     names.push(filepicker.get(0).files[i].name);
   }
+
+  let chapter_titles = {};
+  let manga_db = {};
+  let group_db = {};
+  ['#chapter_titles', '#manga_db', '#group_db'].forEach(function(db) {
+    $(db).val().split('\n').forEach(function(line) {
+      const split = line.split(/(\d+):(.+)/);
+      if(split[1] && split[2]) {
+        if(db == '#chapter_titles') chapter_titles[split[1]] = split[2];
+        if(db == '#manga_db') manga_db[split[2].toLowerCase()] = split[1];
+        if(db == '#group_db') group_db[split[2].toLowerCase()] = split[1];
+      }
+    });
+    if(db == '#manga_db') localStorage.setItem('manga_db', JSON.stringify(manga_db));
+    if(db == '#group_db') localStorage.setItem('group_db', JSON.stringify(group_db));
+  });
+
   const regParts = $('#regex').val().match(/^\/(.*?)\/([gmiyu]*)$/);
   const regex = regParts ? new RegExp(regParts[1], regParts[2]) : new RegExp($('#regex').val());
   let uploads = [];
 
   const lang = $('#lang_id').val();
-  const fallback_group = $('#group_id').val();
+  const fallback_group = $('#group_id').val() ? $('#group_id').val() : 2;
   const fallback_manga = $('#fallback_manga').val();
   names.forEach(function(name, index) {
     const matches = regex.exec(name + name);
     if(matches) {
+      let manga = false;
+      Object.keys(manga_db).forEach(function(index) {
+        if(name.toLowerCase().includes(index)) {
+          manga = manga_db[index];
+        }
+      });
+      const manga_id = manga ? manga : fallback_manga;
       const group = !matches[4] ? matches[1] : matches[4];
-      const chapter = matches[3];
-      const volume = matches[2];
+      const group_id = Object.keys(group_db).includes(group.toLowerCase()) ? group_db[group.toLowerCase()] : fallback_group;
+      const chapter = matches[3].replace(/^0+(?=\d)/, '');
+      const volume = matches[2].replace(/^0+(?=\d)/, '');
+      const title = Object.keys(chapter_titles).includes(chapter.toString()) ? chapter_titles[chapter] : '';
       uploadLog('Added to the upload queue [' + group + '] Vol.' + volume + ' Ch.' + chapter + ' (' + name + ') {' + index + '}', 'normal');
 
       let upload = new FormData();
-      upload.append('manga_id', fallback_manga);
+      upload.append('manga_id', manga_id);
       upload.append('volume_number', volume);
       upload.append('chapter_number', chapter);
-      upload.append('chapter_name', '');
-      upload.append('group_id', 2);
+      upload.append('chapter_name', title);
+      upload.append('group_id', group_id);
       upload.append('lang_id', lang);
       upload.append('file', filepicker.get(0).files[index]);
       uploads.push(upload);
@@ -57,7 +86,11 @@ function processFiles() {
       uploadLog('Skipped. Regex doesn\'t match (' + name + ') {' + index + '}', 'warning');
     }
   });
-  uploadFiles(uploads);
+  if(uploads.length > 0) {
+    uploadFiles(uploads);
+  } else {
+    uploadLog('None of your files were uploaded', 'error');
+  }
 }
 
 function uploadFiles(files) {
@@ -135,9 +168,11 @@ function uploadFiles(files) {
   color: rgba(255, 255, 255, .3);
 }
 
-#progressbar_m {
+#progressbar_m:not([style="width: 0%;"]) {
   height: 38px;
   border-radius: 5px;
+  margin-top: 80px;
+  float: none;
 }
 
 label {
@@ -153,7 +188,7 @@ label {
 }
 
 #logs .error {
-  color: green;
+  color: red;
 }
 
 #logs .warning {
@@ -292,5 +327,15 @@ label {
   }).appendTo(mangadex_uploader);
 
   mangadex_uploader.appendTo('.panel:last-child .panel-body');
+  ['manga_db', 'group_db'].forEach(function(db) {
+    if(localStorage.getItem(db)) {
+      let text = '';
+      const entries = JSON.parse(localStorage.getItem(db));
+      Object.keys(entries).forEach(function(entry) {
+        text += entries[entry] + ':' + entry + '\n';
+      });
+      $('#' + db).val(text);
+    }
+  });
   $('#start_uploading').click(function() {processFiles();});
 })();
