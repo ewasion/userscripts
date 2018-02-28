@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex upload
 // @namespace    https://github.com/ewasion
-// @version      0.1.0
+// @version      0.1.1
 // @license      CC-BY-NC-SA-4.0
 // @description  Highly customizable upload script for MangaDex
 // @author       Eva
