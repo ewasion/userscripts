@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex upload
 // @namespace    https://github.com/ewasion
-// @version      0.1.5
+// @version      0.1.6
 // @license      GPL-3.0
 // @description  Highly customizable upload script for MangaDex
 // @author       Eva
@@ -9,7 +9,7 @@
 // @match        https://mangadex.org/upload/*
 // @exclude      https://mangadex.com/upload/*?manual
 // @exclude      https://mangadex.org/upload/*?manual
-// @icon         https://mangadex.com/favicon.ico
+// @icon         https://mangadex.org/favicon.ico
 // @homepage     https://ewasion.github.io/userscripts/mangadex-upload/
 // @updateURL    https://raw.githubusercontent.com/ewasion/userscripts/master/mangadex-upload/mangadex-upload.meta.js
 // @downloadURL  https://raw.githubusercontent.com/ewasion/userscripts/master/mangadex-upload/mangadex-upload.user.js
@@ -69,7 +69,7 @@ function processFiles() {
         }
       });
       const manga_id = manga ? manga : fallback_manga;
-      const group = !matches[4] ? matches[1] : matches[4];
+      const group = !matches[4] ? !matches[1] ? '' : matches[1] : $matches[4];
       const group_id = Object.keys(group_db).includes(group.toLowerCase()) ? group_db[group.toLowerCase()] : fallback_group;
       const chapter = matches[3].replace(/^0+(?=\d)/, '');
       const volume = matches[2].replace(/^0+(?=\d)/, '');
