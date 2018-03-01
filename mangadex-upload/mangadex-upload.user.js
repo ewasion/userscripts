@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name         MangaDex upload
 // @namespace    https://github.com/ewasion
-// @version      0.1.4
+// @version      0.1.5
 // @license      GPL-3.0
 // @description  Highly customizable upload script for MangaDex
 // @author       Eva
 // @match        https://mangadex.com/upload/*
+// @match        https://mangadex.org/upload/*
+// @exclude      https://mangadex.com/upload/*?manual
+// @exclude      https://mangadex.org/upload/*?manual
 // @icon         https://mangadex.com/favicon.ico
 // @homepage     https://ewasion.github.io/userscripts/mangadex-upload/
 // @updateURL    https://raw.githubusercontent.com/ewasion/userscripts/master/mangadex-upload/mangadex-upload.meta.js
@@ -21,21 +24,21 @@ function uploadLog(message, display) {
 }
 
 function processFiles() {
-  let filepicker = $("#files");
+  const filepicker = $("#files");
   if(filepicker.get(0).files.length === 0) {
     return alert('You must select at least one file');
   }
   if(!$('#fallback_manga').val()) {
     return alert('You must select a fallback manga');
   }
-  let names = [];
+  const names = [];
   for (var i = 0; i < filepicker.get(0).files.length; ++i) {
     names.push(filepicker.get(0).files[i].name);
   }
 
-  let chapter_titles = {};
-  let manga_db = {};
-  let group_db = {};
+  const chapter_titles = {};
+  const manga_db = {};
+  const group_db = {};
   ['#chapter_titles', '#manga_db', '#group_db'].forEach(function(db) {
     $(db).val().split('\n').forEach(function(line) {
       const split = line.split(/(\d+):(.+)/);
@@ -51,7 +54,7 @@ function processFiles() {
 
   const regParts = $('#regex').val().match(/^\/(.*?)\/([gmiyu]*)$/);
   const regex = regParts ? new RegExp(regParts[1], regParts[2]) : new RegExp($('#regex').val());
-  let uploads = [];
+  const uploads = [];
 
   const lang = $('#lang_id').val();
   const fallback_group = $('#group_id').val() ? $('#group_id').val() : 2;
@@ -73,7 +76,7 @@ function processFiles() {
       const title = Object.keys(chapter_titles).includes(chapter.toString()) ? chapter_titles[chapter] : '';
       uploadLog('Added to the upload queue [' + group + '] Vol.' + volume + ' Ch.' + chapter + ' (' + name + ') {' + index + '}', 'normal');
 
-      let upload = new FormData();
+      const upload = new FormData();
       upload.append('manga_id', manga_id);
       upload.append('volume_number', volume);
       upload.append('chapter_number', chapter);
@@ -94,8 +97,7 @@ function processFiles() {
 }
 
 function uploadFiles(files) {
-  const file = files[0];
-  files.shift();
+  const file = files.shift();
   $.ajax({
     url: "/ajax/actions.ajax.php?function=chapter_upload",
     type: 'POST',
@@ -142,17 +144,18 @@ function uploadFiles(files) {
     location.reload();
     return;
   }
-  let filepicker = $('label[for="file"] + div > div');
-  let langpicker = $('#lang_id');
-  let grouppicker = $('#group_id');
-  let actions = $('#upload_form > div:last-child').prev();
+  const filepicker = $('label[for="file"] + div > div');
+  const langpicker = $('#lang_id');
+  const grouppicker = $('#group_id');
+  const actions = $('#upload_form > div:last-child').prev();
+
   $('#upload_form').remove(); /* Get rid of the low effort upload form */
 
-  let mangadex_uploader = $('<div>', {id: 'mangadex_uploader'});
+  const mangadex_uploader = $('<div>', {id: 'mangadex_uploader'});
 
   /* Fancy title */
-  let title = $('.panel:last-child .panel-title');
-  let titleicon = title.find('span');
+  const title = $('.panel:last-child .panel-title');
+  const titleicon = title.find('span');
   title.text(' Mass upload');
   title.prepend(titleicon);
 
@@ -172,7 +175,7 @@ function uploadFiles(files) {
 
 #mangadex_uploader::before {
   display: block;
-  content: 'MangaDex uploader 0.1.4';
+  content: 'MangaDex uploader 0.1.5';
   margin-bottom: 10px;
   color: rgba(0, 0, 0, .3);
 }
@@ -239,7 +242,7 @@ body.dark #logs .normal {
     class: 'form-control',
     id: 'regex',
     placeholder: 'Regex',
-    value: /.*?(?:\[([^\]]+)\].*)?v[^\d]*?(\.?\d+(?:\.\d+)*[a-zA-Z]?).*?c[^\d]*?(\.?\d+(?:\.\d+)*[a-zA-Z]?).*?(?:\[([^\]]+)\].*)?\.(?:zip|cbz)$/i
+    value: /.*?(?:\[([^\]]+)\].*)?v[^\dc]*?(\.?\d+(?:\.\d+)*[a-zA-Z]?(?!\d)).*?c[^\dv]*?(\.?\d+(?:\.\d+)*[a-zA-Z]?(?!\d)).*?(?:\[([^\]]+)\].*)?\.(?:zip|cbz)$/i
   }).appendTo(mangadex_uploader);
 
   /* Fallbacks */
@@ -318,7 +321,7 @@ body.dark #logs .normal {
 
   /* Back/upload buttons */
   actions.find('#upload_button').attr('id', 'start_uploading');
-  actions.find('[href^="/manga/"]').attr('href', '#');
+  actions.find('[href^="/manga/"]').attr('href', '?manual');
   actions.appendTo(mangadex_uploader);
 
   /* Progress bar */
