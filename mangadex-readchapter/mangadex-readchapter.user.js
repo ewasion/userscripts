@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         MangaDex Read Chapter Tracker
 // @namespace    Teasday
-// @version      1.1.5
+// @version      1.1.6
 // @license      CC-BY-NC-SA-4.0
 // @description  Adds tracking of read chapters to MangaDex
 // @author       Teasday
-// @match        https://mangadex.com/*
-// @icon         https://mangadex.com/favicon.ico
+// @match        https://mangadex.org/*
+// @icon         https://mangadex.org/favicon.ico
 // @homepageURL  https://ewasion.github.io/userscripts/mangadex-readchapter/
 // @updateURL    https://raw.githubusercontent.com/ewasion/userscripts/master/mangadex-readchapter/mangadex-readchapter.meta.js
 // @downloadURL  https://raw.githubusercontent.com/ewasion/userscripts/master/mangadex-readchapter/mangadex-readchapter.user.js
