@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex upload
 // @namespace    https://github.com/ewasion
-// @version      0.1.6
+// @version      0.1.65
 // @license      GPL-3.0
 // @description  Highly customizable upload script for MangaDex
 // @author       Eva
@@ -69,7 +69,7 @@ function processFiles() {
         }
       });
       const manga_id = manga ? manga : fallback_manga;
-      const group = !matches[4] ? !matches[1] ? '' : matches[1] : $matches[4];
+      const group = !matches[4] ? !matches[1] ? '' : matches[1] : matches[4];
       const group_id = Object.keys(group_db).includes(group.toLowerCase()) ? group_db[group.toLowerCase()] : fallback_group;
       const chapter = matches[3].replace(/^0+(?=\d)/, '');
       const volume = matches[2].replace(/^0+(?=\d)/, '');
@@ -175,7 +175,7 @@ function uploadFiles(files) {
 
 #mangadex_uploader::before {
   display: block;
-  content: 'MangaDex uploader 0.1.5';
+  content: 'MangaDex uploader 0.1.65';
   margin-bottom: 10px;
   color: rgba(0, 0, 0, .3);
 }
