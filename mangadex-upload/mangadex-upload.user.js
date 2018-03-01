@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MangaDex upload
 // @namespace    https://github.com/ewasion
-// @version      0.1.65
+// @version      0.1.7
 // @license      GPL-3.0
 // @description  Highly customizable upload script for MangaDex
 // @author       Eva
@@ -175,7 +175,7 @@ function uploadFiles(files) {
 
 #mangadex_uploader::before {
   display: block;
-  content: 'MangaDex uploader 0.1.65';
+  content: 'MangaDex uploader 0.1.7';
   margin-bottom: 10px;
   color: rgba(0, 0, 0, .3);
 }
@@ -355,4 +355,13 @@ body.dark #logs .normal {
     }
   });
   $('#start_uploading').click(function() {processFiles();});
+
+  $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+  	let input = $(this).parents('.input-group').find(':text'),
+  	log = numFiles > 1 ? numFiles + ' files selected' : label;
+    if(input.length) {
+      input.val(log);
+    }
+  	$("#upload_button").focus();
+  });
 })();
