@@ -8,7 +8,7 @@
 // @updateURL   https://raw.githubusercontent.com/ewasion/userscripts/master/ab-stats/ab-stats.meta.js
 // @downloadURL https://raw.githubusercontent.com/ewasion/userscripts/master/ab-stats/ab-stats.user.js
 // @include     https://animebytes.tv/user.php?*
-// @version     1.0.2
+// @version     1.0.3
 // @license     GPL-3.0
 // @grant       none
 // ==/UserScript==
@@ -23,13 +23,13 @@ stats.push($('.userstatsleft .userprofile_list dd:nth-child(2)').has('span').len
 stats.push($('.userstatsleft .userprofile_list dd:nth-child(4)').has('span').length);
 
 function traffic(str) {
-  if (str.includes('MB')) {
+  if (str.includes('MiB')) {
     return str.split(' ')[0] * 1e+6;
   }
-  if (str.includes('GB')) {
+  if (str.includes('GiB')) {
     return str.split(' ')[0] * 1e+9;
   }
-  if (str.includes('TB')) {
+  if (str.includes('TiB')) {
     return str.split(' ')[0] * 1e+12;
   }
   return str.split(' ')[0];
